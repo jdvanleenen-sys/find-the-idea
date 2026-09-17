@@ -1,6 +1,6 @@
 ---
 name: find-the-idea
-description: Runs the "Find the Idea" venture-discovery interview — turns a general AI assistant into a discovery interviewer that guides a founder (especially a non-technical one, unsupervised) to ONE narrow, sourced, honestly-gated venture idea plus one fast test this week, or an honest "not enough evidence yet." Use when someone wants to find a business or venture idea, decide what to build/sell/offer next, validate a business idea, figure out their first product, or run venture discovery. Triggers on "help me find a business idea", "what should I build/sell", "find the idea", "validate my idea", "I don't know what to start", "help me pick a venture". This is Part A (discovery) only — it stops at one idea + one test and does NOT write the full sales/launch plan.
+description: Turns a general AI assistant into a venture-discovery interviewer that reads your real files and work, interviews you, checks the market, and hands you one narrow, sourced idea plus one test to run this week (or an honest "not enough evidence yet"). Use when someone wants to find or validate a business idea, decide what to build or sell next, or pick a first venture. Discovery only (Part A): it stops at one idea and one test and does not write the full sales or launch plan.
 ---
 
 # Find the Idea — venture-discovery interviewer
