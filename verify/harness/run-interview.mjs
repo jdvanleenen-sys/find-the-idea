@@ -9,6 +9,7 @@
 
 import { readFileSync, writeFileSync, mkdirSync } from "node:fs";
 import { dirname, join } from "node:path";
+import { createHash } from "node:crypto";
 import { fileURLToPath } from "node:url";
 import { createSession, send, webToolCalls } from "./claude-cli.mjs";
 
@@ -42,6 +43,7 @@ function runConversation(opts) {
   const owner = createSession({ systemPrompt: readFileSync(opts.persona, "utf8"), model: opts.ownerModel });
   const turns = [];
   let toInterviewer = readFileSync(opts.prompt, "utf8");
+  opts.promptSha = createHash("sha256").update(toInterviewer).digest("hex").slice(0, 12);
   for (let i = 0; i < opts.maxTurns; i++) {
     const ai = send(interviewer, toInterviewer);
     turns.push({ who: "AI", text: ai });
@@ -58,7 +60,7 @@ function toMarkdown(opts, run) {
   const web = webToolCalls(run.interviewer);
   const head = [
     `# Interview receipt: ${opts.persona.split(/[\\/]/).pop()}`, "",
-    `- Prompt: \`${opts.prompt.split(/[\\/]/).slice(-2).join("/")}\``,
+    `- Prompt: \`${opts.prompt.split(/[\\/]/).slice(-2).join("/")}\` (sha256 ${opts.promptSha}, read at start)`,
     `- Interviewer model: ${opts.model} · web tools: ${opts.web ? "on" : "off"}`,
     `- Owner model: ${opts.ownerModel}`,
     `- Real web searches by interviewer: ${web.searches.length} · pages fetched: ${web.fetches.length}` +
