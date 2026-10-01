@@ -14,6 +14,7 @@ this week — or an honest "not enough evidence yet." Part A (discovery) only.
 | Check nothing drifted before publishing | `checker/` — run `node checker/check.mjs` |
 | Use or install it as a human | `README.md`; install with `node scripts/install.mjs` |
 | Test it against trades owners | `verify/` (harness, personas, grader); past runs in `receipts/` |
+| Run it with real owners | `real-run/` (`FOR-OWNERS.md` to send, `README.md` runbook); real transcripts stay local in `receipts/real/` (gitignored) |
 | The plan and definition of done for v7 | `plan/2026-10-01-trades-owner-briefing.md` |
 
 ## The one rule that matters

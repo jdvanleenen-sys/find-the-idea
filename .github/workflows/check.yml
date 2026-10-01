@@ -18,3 +18,5 @@ jobs:
         run: node checker/selftest.mjs
       - name: Prove the transcript grader can fail
         run: node verify/selftest.mjs
+      - name: Prove the transcript importer round-trips and redacts
+        run: node verify/selftest-import.mjs
