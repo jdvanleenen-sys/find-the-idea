@@ -9,15 +9,18 @@ import { readFileSync } from "node:fs";
 import { basename, dirname } from "node:path";
 import { RULES } from "./grade-rules.mjs";
 
-export function parseReceipt(text) {
+export function parseReceipt(raw) {
+  // Windows checkouts turn LF into CRLF; without this the split below finds no turns and every rule passes.
+  const text = raw.replace(/\r\n/g, "\n");
   const searches = Number((text.match(/Real web searches by interviewer: (\d+)/) || [])[1] ?? 0);
   const fetches = Number((text.match(/pages fetched: (\d+)/) || [])[1] ?? 0);
+  const webUnknown = /Real web searches by interviewer: unknown/.test(text);
   const ended = /ended with closing line: true/.test(text);
   const body = text.split(/\n---\n/).slice(1).join("\n---\n");
   const blocks = body.split(/^### (AI|OWNER)\s*$/m).slice(1);
   const ai = [];
   for (let i = 0; i < blocks.length; i += 2) if (blocks[i] === "AI") ai.push(blocks[i + 1].trim());
-  return { ai, final: ai[ai.length - 1] ?? "", webSearches: searches, pagesFetched: fetches, ended };
+  return { ai, final: ai[ai.length - 1] ?? "", webSearches: searches, pagesFetched: fetches, webUnknown, ended };
 }
 
 export function gradeReceipt(text) {
