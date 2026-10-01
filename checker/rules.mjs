@@ -1,6 +1,6 @@
 // Invariants the prompt and its package must keep. Each check returns a list of failure strings.
 
-import { existsSync, readFileSync } from "node:fs";
+import { existsSync, readFileSync, readdirSync } from "node:fs";
 import { join } from "node:path";
 
 export const ANCHOR = "You are my venture strategist and discovery interviewer.";
@@ -57,6 +57,31 @@ export function checkLeaks(files, leakFile) {
     terms.push(...readFileSync(leakFile, "utf8").split(/\r?\n/).map((t) => t.trim()).filter(Boolean));
   }
   const fails = [];
+  for (const [name, text] of Object.entries(files)) {
+    for (const t of terms) if (text.toLowerCase().includes(t.toLowerCase())) fails.push(`Leak term found in ${name}.`);
+  }
+  return fails;
+}
+
+// Receipts are public transcripts. No email address and no leak term may appear in them.
+export function checkReceipts(root, leakFile) {
+  const dir = join(root, "receipts");
+  if (!existsSync(dir)) return [];
+  const files = {};
+  const walk = (d) => {
+    for (const e of readdirSync(d, { withFileTypes: true })) {
+      const p = join(d, e.name);
+      if (e.isDirectory()) walk(p);
+      else if (e.name.endsWith(".md")) files[p.slice(root.length + 1)] = readFileSync(p, "utf8");
+    }
+  };
+  walk(dir);
+  const fails = [];
+  for (const [name, text] of Object.entries(files)) {
+    if (/[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}/.test(text)) fails.push(`Email address found in ${name}.`);
+  }
+  const terms = existsSync(leakFile)
+    ? readFileSync(leakFile, "utf8").split(/\r?\n/).map((t) => t.trim()).filter(Boolean) : [];
   for (const [name, text] of Object.entries(files)) {
     for (const t of terms) if (text.toLowerCase().includes(t.toLowerCase())) fails.push(`Leak term found in ${name}.`);
   }

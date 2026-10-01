@@ -72,7 +72,8 @@ function toMarkdown(opts, run) {
     `- Run at: ${new Date().toISOString()}`, "", "---", "",
   ];
   const body = run.turns.map((t) => `### ${t.who}\n\n${t.text}\n`);
-  return head.concat(body).join("\n");
+  // The CLI injects the account email into each session, and a model may repeat it. Receipts are public.
+  return head.concat(body).join("\n").replace(/[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}/g, "[email redacted]");
 }
 
 const opts = parseArgs(process.argv.slice(2));

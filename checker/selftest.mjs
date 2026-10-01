@@ -10,7 +10,7 @@ const here = dirname(fileURLToPath(import.meta.url));
 const run = spawnSync(process.execPath, [join(here, "check.mjs"), "--root", join(here, "fixtures", "bad-package")],
   { encoding: "utf8" });
 const out = run.stderr + run.stdout;
-const planted = ["DRIFTED", "Load-bearing rule 7a", "em/en dashes", '"ICM"', "Leak term found in README.md"];
+const planted = ["DRIFTED", "Load-bearing rule 7a", "em/en dashes", '"ICM"', "Leak term found in README.md", "Email address found in receipts"];
 const missed = planted.filter((p) => !out.includes(p));
 if (run.status === 0 || missed.length) {
   console.error(`SELFTEST FAIL: checker exit ${run.status}; missed: ${missed.join(", ") || "none"}`);

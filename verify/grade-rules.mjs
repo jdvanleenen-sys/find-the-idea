@@ -17,7 +17,8 @@ const LEAK_FILE = join(dirname(fileURLToPath(import.meta.url)), "..", "checker",
 const escapeRe = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 const localTerms = existsSync(LEAK_FILE)
   ? readFileSync(LEAK_FILE, "utf8").split(/\r?\n/).map((t) => t.trim()).filter(Boolean) : [];
-const LEAK = new RegExp(["\\bexecutive\\b", ...localTerms.map(escapeRe)].join("|"), "i");
+const EMAIL = "[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}";
+const LEAK = new RegExp(["\\bexecutive\\b", EMAIL, ...localTerms.map(escapeRe)].join("|"), "i");
 export const LEAK_TERMS_LOADED = localTerms.length;
 // "I searched nothing" is a denial, not a claim, so negated forms are excluded.
 const CLAIMS_SEARCH = /\b(i searched(?! nothing| no)|i looked (it )?up|search(es)? (returned|show)|i found (online|that)|according to [A-Z]|\[SOURCED)/i;

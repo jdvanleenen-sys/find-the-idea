@@ -4,7 +4,8 @@
 //   2. The seven load-bearing rules from provenance.md are still in the prompt.
 //   3. Voice: no em/en dashes, no "ICM", no honesty framing, within the word budget.
 //   4. No private names (checker/leak-terms.local.txt, gitignored) in the shipped files.
-//   5. With --installed: the installed skill matches this repo.
+//   5. No email address or leak term in receipts/ (public transcripts).
+//   6. With --installed: the installed skill matches this repo.
 //
 // Usage: node checker/check.mjs [--root <package dir>] [--installed [<skills dir>]]
 
@@ -12,7 +13,7 @@ import { readFileSync, existsSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { dirname, join } from "node:path";
 import { homedir } from "node:os";
-import { checkEmbedding, checkLoadBearing, checkVoice, checkLeaks, checkInstalled } from "./rules.mjs";
+import { checkEmbedding, checkLoadBearing, checkVoice, checkLeaks, checkInstalled, checkReceipts } from "./rules.mjs";
 
 const here = dirname(fileURLToPath(import.meta.url));
 const args = process.argv.slice(2);
@@ -29,6 +30,7 @@ if (skill !== null && prompt !== null) {
   fails.push(...checkEmbedding(skill, prompt), ...checkLoadBearing(prompt), ...checkVoice(prompt));
   const shipped = { "SKILL.md": skill, "find-the-idea-prompt.md": prompt, "README.md": read("README.md") ?? "" };
   fails.push(...checkLeaks(shipped, join(here, "leak-terms.local.txt")));
+  fails.push(...checkReceipts(root, join(here, "leak-terms.local.txt")));
 }
 if (flag("--installed") >= 0) {
   const next = args[flag("--installed") + 1];
