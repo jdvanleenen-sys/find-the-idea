@@ -1,54 +1,46 @@
 #!/usr/bin/env node
-// ICM checker for the find-the-idea skill package.
-// Enforces the two functional invariants:
-//   1. SKILL.md exists at the package root with `name: find-the-idea` in its frontmatter.
-//   2. The v6 prompt embedded in SKILL.md is identical to find-the-idea-prompt.md
-//      (find-the-idea-prompt.md is the single source of truth; SKILL.md embeds a derived copy).
-// Run from the package root:  node checker/check.mjs
+// Checker for the find-the-idea skill package. Fails loud on any drift.
+//   1. SKILL.md has `name: find-the-idea` and embeds find-the-idea-prompt.md exactly.
+//   2. The seven load-bearing rules from provenance.md are still in the prompt.
+//   3. Voice: no em/en dashes, no "ICM", no honesty framing, within the word budget.
+//   4. No private names (checker/leak-terms.local.txt, gitignored) in the shipped files.
+//   5. With --installed: the installed skill matches this repo.
+//
+// Usage: node checker/check.mjs [--root <package dir>] [--installed [<skills dir>]]
 
 import { readFileSync, existsSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { dirname, join } from "node:path";
+import { homedir } from "node:os";
+import { checkEmbedding, checkLoadBearing, checkVoice, checkLeaks, checkInstalled } from "./rules.mjs";
 
-const root = join(dirname(fileURLToPath(import.meta.url)), "..");
-const norm = (s) => s.replace(/\r\n/g, "\n").replace(/[ \t]+$/gm, "").trim();
-const anchor = "You are my venture strategist and discovery interviewer.";
-let ok = true;
-const fail = (m) => { ok = false; console.error("FAIL: " + m); };
+const here = dirname(fileURLToPath(import.meta.url));
+const args = process.argv.slice(2);
+const flag = (name) => args.indexOf(name);
+const root = flag("--root") >= 0 ? args[flag("--root") + 1] : join(here, "..");
+const read = (f) => (existsSync(join(root, f)) ? readFileSync(join(root, f), "utf8") : null);
 
-const skillPath = join(root, "SKILL.md");
-const promptPath = join(root, "find-the-idea-prompt.md");
-
-let skill = "";
-let prompt = "";
-
-if (!existsSync(skillPath)) {
-  fail("SKILL.md is missing from the package root (the skill loader needs it there).");
-} else {
-  skill = readFileSync(skillPath, "utf8");
-  if (!/^name:\s*find-the-idea\s*$/m.test(skill)) {
-    fail("SKILL.md frontmatter is missing `name: find-the-idea`.");
-  }
+const fails = [];
+const skill = read("SKILL.md");
+const prompt = read("find-the-idea-prompt.md");
+if (skill === null) fails.push("SKILL.md is missing from the package root (the skill loader needs it there).");
+if (prompt === null) fails.push("find-the-idea-prompt.md is missing (it is the source of truth and the escape hatch).");
+if (skill !== null && prompt !== null) {
+  fails.push(...checkEmbedding(skill, prompt), ...checkLoadBearing(prompt), ...checkVoice(prompt));
+  const shipped = { "SKILL.md": skill, "find-the-idea-prompt.md": prompt, "README.md": read("README.md") ?? "" };
+  fails.push(...checkLeaks(shipped, join(here, "leak-terms.local.txt")));
+}
+if (flag("--installed") >= 0) {
+  const next = args[flag("--installed") + 1];
+  const dir = next && !next.startsWith("--") ? next : join(homedir(), ".claude", "skills", "find-the-idea");
+  fails.push(...checkInstalled(root, dir));
 }
 
-if (!existsSync(promptPath)) {
-  fail("find-the-idea-prompt.md is missing from the root (the escape hatch pastes it; it is the source of truth).");
-} else {
-  prompt = readFileSync(promptPath, "utf8");
-}
-
-if (skill && prompt) {
-  const i = skill.indexOf(anchor);
-  if (i === -1) {
-    fail("Could not find the v6 prompt inside SKILL.md (anchor line missing).");
-  } else if (norm(skill.slice(i)) !== norm(prompt)) {
-    fail("The prompt embedded in SKILL.md has DRIFTED from find-the-idea-prompt.md. Re-copy the source into SKILL.md's VERBATIM INSTRUCTIONS block.");
-  }
-}
-
-if (ok) {
-  console.log("PASS: SKILL.md present at root with correct name, and the embedded prompt matches find-the-idea-prompt.md exactly.");
-} else {
+if (fails.length) {
+  for (const f of fails) console.error("FAIL: " + f);
   console.error("\nChecker found problems. Fix them before publishing.");
   process.exitCode = 1;
+} else {
+  console.log("PASS: prompt embedded exactly, load-bearing rules present, voice clean, no leak terms" +
+    (flag("--installed") >= 0 ? ", installed copy matches." : "."));
 }

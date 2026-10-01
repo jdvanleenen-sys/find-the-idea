@@ -14,3 +14,7 @@ jobs:
           node-version: "20"
       - name: Run the skill checker
         run: node checker/check.mjs
+      - name: Prove the checker can fail
+        run: node checker/selftest.mjs
+      - name: Prove the transcript grader can fail
+        run: node verify/selftest.mjs

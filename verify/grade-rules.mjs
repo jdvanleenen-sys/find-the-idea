@@ -13,7 +13,7 @@ const PRAISE_OPENER = /^(great|good|love|awesome|perfect|excellent|fantastic|ama
 const US_SPELLING = /\b(color|colors|colored|favorite|behavior|behaviors|center|centers|labor|neighbor|neighbors|honor|catalog)\b/i;
 // Private names (the author's employer and similar) live in a gitignored local file, one per line,
 // so this public repo never contains them. "executive" stays built in: no job title in member output.
-const LEAK_FILE = join(dirname(fileURLToPath(import.meta.url)), "leak-terms.local.txt");
+const LEAK_FILE = join(dirname(fileURLToPath(import.meta.url)), "..", "checker", "leak-terms.local.txt");
 const escapeRe = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 const localTerms = existsSync(LEAK_FILE)
   ? readFileSync(LEAK_FILE, "utf8").split(/\r?\n/).map((t) => t.trim()).filter(Boolean) : [];
