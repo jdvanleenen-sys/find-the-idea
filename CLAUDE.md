@@ -12,12 +12,15 @@ this week — or an honest "not enough evidence yet." Part A (discovery) only.
 | What it is · how it was hardened · what NOT to change | `provenance.md` |
 | The exact contract (inputs · process · output · human check) | `CONTEXT.md` |
 | Check nothing drifted before publishing | `checker/` — run `node checker/check.mjs` |
-| Use or install it as a human | `README.md` |
+| Use or install it as a human | `README.md`; install with `node scripts/install.mjs` |
+| Test it against trades owners | `verify/` (harness, personas, grader); past runs in `receipts/` |
+| The plan and definition of done for v7 | `plan/2026-10-01-trades-owner-briefing.md` |
 
 ## The one rule that matters
 `find-the-idea-prompt.md` is the single home for the prompt text. `SKILL.md` embeds a copy so the
 skill loads reliably in one read. If you change the prompt: edit `find-the-idea-prompt.md`, paste it
-back into SKILL.md's VERBATIM INSTRUCTIONS block, then run the checker. The prompt is
+back into SKILL.md's VERBATIM INSTRUCTIONS block, run the checker, rerun the harness, then
+`node scripts/install.mjs`. This repo is the only home; Jeff's private notes point here. The prompt is
 red-team-hardened — read `provenance.md` before touching any rule.
 
 ## Scope

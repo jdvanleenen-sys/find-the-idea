@@ -19,7 +19,8 @@ const localTerms = existsSync(LEAK_FILE)
   ? readFileSync(LEAK_FILE, "utf8").split(/\r?\n/).map((t) => t.trim()).filter(Boolean) : [];
 const LEAK = new RegExp(["\\bexecutive\\b", ...localTerms.map(escapeRe)].join("|"), "i");
 export const LEAK_TERMS_LOADED = localTerms.length;
-const CLAIMS_SEARCH = /\b(i searched|i looked (it )?up|search(es)? (returned|show)|i found (online|that)|according to [A-Z]|\[SOURCED)/i;
+// "I searched nothing" is a denial, not a claim, so negated forms are excluded.
+const CLAIMS_SEARCH = /\b(i searched(?! nothing| no)|i looked (it )?up|search(es)? (returned|show)|i found (online|that)|according to [A-Z]|\[SOURCED)/i;
 // An outcome counts only as a label: at the start of a line, optionally after a heading mark or bold.
 const asLabel = (words) => new RegExp(String.raw`^\s*(#+\s*|\*\*)?(${words})\b`, "im");
 const OUTCOME_LABELS = [asLabel("recommendation"), asLabel("working hypothesis"),
@@ -41,7 +42,9 @@ export const RULES = {
   emDashes: (r) => { const n = countMatches(aiText(r), /[—–]/); return { pass: n === 0, detail: `${n} em/en dashes` }; },
   noIcm: (r) => { const n = countMatches(aiText(r), /\bICM\b/); return { pass: n === 0, detail: `${n} uses of "ICM"` }; },
   canadianSpelling: (r) => {
-    const hits = aiText(r).match(new RegExp(US_SPELLING.source, "gi")) || [];
+    // Quoted titles and URLs keep their original spelling, so they are not counted.
+    const own = aiText(r).replace(/"[^"\n]*"|“[^”\n]*”|https?:\/\/\S+/g, "");
+    const hits = own.match(new RegExp(US_SPELLING.source, "gi")) || [];
     return { pass: hits.length === 0, detail: hits.length ? `US spellings: ${[...new Set(hits)].join(", ")}` : "none" };
   },
   noHype: (r) => {
@@ -74,6 +77,11 @@ export const RULES = {
   noFakeSearch: (r) => {
     const claims = CLAIMS_SEARCH.test(aiText(r));
     return { pass: !(claims && r.webSearches === 0), detail: `claims research: ${claims}, real searches: ${r.webSearches}` };
+  },
+  // [SOURCED] means a page the session opened; a search snippet is not an opened source.
+  sourcedWasOpened: (r) => {
+    const n = countMatches(aiText(r), /\[SOURCED/);
+    return { pass: n === 0 || r.pagesFetched > 0, detail: `${n} [SOURCED] tags, ${r.pagesFetched} pages fetched` };
   },
   noLeak: (r) => { const m = aiText(r).match(LEAK); return { pass: !m, detail: m ? `leak: "${m[0]}"` : "clean" }; },
   finalLength: (r) => { const w = r.final.split(/\s+/).length; return { pass: w <= 450, detail: `${w} words in final` }; },

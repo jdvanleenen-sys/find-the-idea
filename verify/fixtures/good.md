@@ -1,13 +1,13 @@
 # Interview receipt: good (positive fixture, every mechanical rule should pass)
 
-- Real web searches by interviewer: 2
+- Real web searches by interviewer: 0
 - AI turns: 3 · ended with closing line: true
 
 ---
 
 ### AI
 
-I can search the web in this chat. I can only read a file if you paste it. What do your Google reviews praise most?
+I can't search the web in this chat. I can only read a file if you paste it. What do your Google reviews praise most?
 
 ### OWNER
 
@@ -31,6 +31,6 @@ How many calls did you miss last week, and how many did you return?
 
 **Own it.** Post the count in your Build Card thread.
 
-Evidence note: the call numbers are yours; nothing about the market is sourced yet.
+Evidence note: the call numbers are yours; I searched nothing, so nothing about the market is sourced, not even "Color Trends 2026".
 
 When you're ready to turn this into an offer and a full sales plan, that's the next step.

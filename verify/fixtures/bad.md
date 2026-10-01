@@ -15,4 +15,4 @@ Paint.
 
 ### AI
 
-I searched and found that painters love this. As an executive I'd say pick a color. RECOMMENDATION: build an app. WORKING HYPOTHESIS: maybe not.
+I searched and found that painters love this [SOURCED: a blog]. As an executive I'd say pick a color. RECOMMENDATION: build an app. WORKING HYPOTHESIS: maybe not.

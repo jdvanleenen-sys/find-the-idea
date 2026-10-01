@@ -1,9 +1,10 @@
 # Find the Idea
 
-A venture-discovery tool. Give it to any capable AI assistant (ChatGPT, Claude, or Perplexity) and
-it interviews you down to **one** narrow, painful problem for a buyer you can actually reach, plus
-**one** fast test you can run this week to find out if it's real. If the evidence isn't there, it
-says so honestly instead of inventing a business.
+A venture-discovery tool for trades and home-service owners. Give it to any capable AI assistant
+(ChatGPT, Claude, or Perplexity) and it interviews you about your real business (what customers keep
+asking for, what your reviews say, the calls you miss, the quotes you lose) down to **one** narrow,
+painful problem for a buyer you can actually reach, plus **one** test you can run this week. If the
+evidence isn't there, it says so instead of inventing a business.
 
 It is built to be safe for a non-technical person to run unsupervised: it won't fake research it
 didn't do, won't use your private data without asking, and won't promise earnings.
@@ -15,18 +16,20 @@ didn't do, won't use your private data without asking, and won't promise earning
 
 **1. Paste the prompt (works anywhere).**
 Open [`find-the-idea-prompt.md`](find-the-idea-prompt.md), copy the whole thing, paste it into a
-fresh chat, and answer its questions. For a full recommendation, use an assistant that can browse
-the web; without browsing it will give you an honest working hypothesis instead.
+fresh chat, and answer its questions. For a full recommendation, use an assistant that can search
+the web; without search it gives you a working hypothesis instead.
 
 **2. Install it as a Claude skill.**
-Copy this folder into your Claude skills directory (e.g. `~/.claude/skills/find-the-idea/`). Then
+Run `node scripts/install.mjs` (it copies `SKILL.md` and the prompt to `~/.claude/skills/find-the-idea/`). Then
 just say "help me find a business idea" or type `/find-the-idea`. Say "give me the raw prompt" and
 it hands you the portable version to paste elsewhere.
 
 ## What you get
-One of three honest outcomes: a **Recommendation** (buyer, offer, and a test with a clear pass/fail),
-a **Working Hypothesis** (best guess plus what still needs checking), or **Can't Recommend Yet**
-(what's missing and one small next step). This is discovery only. Turning the idea into a full offer
+One of three outcomes, laid out as **See it** (what the evidence shows), **Do it** (one test this
+week with the result that means yes or no) and **Own it** (what you do with the result): a
+**Recommendation**, a **Working Hypothesis** (best guess, not validated), or **Not enough evidence
+yet** (what's missing and one small step). If your idea, or a leak that would sink it, matches a build
+in the trades build library (the AI receptionist, quote-to-invoice), it says so. This is discovery only. Turning the idea into a full offer
 and sales plan is a separate step.
 
 ## What it reads
@@ -45,6 +48,13 @@ The folder is an ICM (Interpretable Context Methodology) package, and the struct
 documentation. Start at [`CLAUDE.md`](CLAUDE.md) to walk it, [`provenance.md`](provenance.md) for
 how the prompt was hardened and which rules must not be softened, and [`CONTEXT.md`](CONTEXT.md) for
 the exact contract. Before publishing changes, run `node checker/check.mjs`.
+
+## How it's tested
+`verify/harness/run-interview.mjs` runs a full interview between two separate AI sessions: one gets
+only the prompt, the other plays a trades owner from `verify/personas/`. `verify/grade.mjs` checks
+the transcript (outcome label, See it / Do it / Own it, voice, grounding questions, no faked
+research). Every run is kept in `receipts/`, with the prompt's hash and the searches it actually made.
+`node checker/selftest.mjs` and `node verify/selftest.mjs` prove both checks can fail.
 
 ## License
 This package is released under the MIT License, copyright 2026 Jeff Van Leenen. See

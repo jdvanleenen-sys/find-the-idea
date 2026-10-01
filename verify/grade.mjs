@@ -11,12 +11,13 @@ import { RULES } from "./grade-rules.mjs";
 
 export function parseReceipt(text) {
   const searches = Number((text.match(/Real web searches by interviewer: (\d+)/) || [])[1] ?? 0);
+  const fetches = Number((text.match(/pages fetched: (\d+)/) || [])[1] ?? 0);
   const ended = /ended with closing line: true/.test(text);
   const body = text.split(/\n---\n/).slice(1).join("\n---\n");
   const blocks = body.split(/^### (AI|OWNER)\s*$/m).slice(1);
   const ai = [];
   for (let i = 0; i < blocks.length; i += 2) if (blocks[i] === "AI") ai.push(blocks[i + 1].trim());
-  return { ai, final: ai[ai.length - 1] ?? "", webSearches: searches, ended };
+  return { ai, final: ai[ai.length - 1] ?? "", webSearches: searches, pagesFetched: fetches, ended };
 }
 
 export function gradeReceipt(text) {
